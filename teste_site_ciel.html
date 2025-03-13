@@ -261,6 +261,24 @@
             }
         }
 
+// partie connexion au serveur nginx
+        fetch('https://api.site.com/endpoint', {
+  method: 'GET',  // Ou 'POST' selon tes besoins
+  headers: {
+    'Content-Type': 'application/json',
+  }
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);  // Gère la réponse ici
+  })
+  .catch(error => {
+    console.error('Erreur:', error);  // Gère les erreurs
+  });
+
+
+
+        
     </script>
 </body>
 </html>
