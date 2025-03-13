@@ -261,20 +261,64 @@
             }
         }
 
-// partie connexion au serveur nginx
-        fetch('https://api.site.com/endpoint', {
-  method: 'GET',  // Ou 'POST' selon tes besoins
-  headers: {
-    'Content-Type': 'application/json',
+// partie securitée (us4)
+const express = require('express');
+const session = require('express-session');
+const csrf = require('csurf');
+const app = express();
+
+// Middleware pour gérer les requêtes JSON
+app.use(express.json());
+
+// Activation de la session avec options sécurisées pour les cookies
+app.use(session({
+  secret: 'votreSecret', // Utilisez une clé secrète pour signer les sessions
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: true,        // Utiliser le cookie uniquement sur HTTPS
+    httpOnly: true,      // Ne pas permettre l'accès au cookie via JavaScript
+    sameSite: 'Strict'   // Empêcher l'envoi du cookie avec des requêtes cross-site
   }
-})
-  .then(response => response.json())
-  .then(data => {
-    console.log(data);  // Gère la réponse ici
-  })
-  .catch(error => {
-    console.error('Erreur:', error);  // Gère les erreurs
+}));
+
+// Configuration de CSRF avec un cookie sécurisé
+const csrfProtection = csrf({ cookie: true });
+
+// Middleware pour vérifier le jeton CSRF sur les requêtes sensibles
+app.use(csrfProtection);
+
+// Exemple de route qui génère et renvoie un jeton CSRF
+app.get('/form', (req, res) => {
+  res.send(`
+    <form method="POST" action="/sensitive-action">
+      <input type="hidden" name="_csrf" value="${req.csrfToken()}">
+      <button type="submit">Soumettre</button>
+    </form>
+  `);
+});
+
+// Route sensible nécessitant une protection CSRF
+app.post('/sensitive-action', (req, res) => {
+  // Cette route est protégée par CSRF et nécessite un jeton valide
+  res.send('Action traitée en toute sécurité');
+});
+
+// Route de connexion avec régénération de l'ID de session
+app.post('/login', (req, res, next) => {
+  // Logique de connexion ici (vérification des identifiants, etc.)
+  req.session.regenerate((err) => {
+    if (err) return next(err);
+    // Initialiser la session après la régénération
+    res.send('Connexion réussie');
   });
+});
+
+// Démarrage du serveur
+app.listen(3000, () => {
+  console.log('Le serveur est en cours d\'exécution sur le port 3000');
+});
+
 
 
 
