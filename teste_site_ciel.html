@@ -304,12 +304,12 @@ app.post('/sensitive-action', (req, res) => {
   res.send('Action traitée en toute sécurité');
 });
 
-// Route de connexion avec régénération de l'ID de session
+//ID connexion
 app.post('/login', (req, res, next) => {
-  // Logique de connexion ici (vérification des identifiants, etc.)
+  // verif id
   req.session.regenerate((err) => {
     if (err) return next(err);
-    // Initialiser la session après la régénération
+    // session apres regeneration
     res.send('Connexion réussie');
   });
 });
